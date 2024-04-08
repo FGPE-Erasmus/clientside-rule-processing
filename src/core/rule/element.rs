@@ -37,6 +37,30 @@ impl Element<u32> {
             _ => ()
         }
     }
+    pub(super) fn fired(&mut self, data: &u32) -> Option<usize> {
+        internals::universal_fired(self, data)
+    }
+    pub(super) fn completed(&mut self, _data: &u32, data_pos: &Option<&usize>) -> bool {
+        internals::universal_completed(self, data_pos)
+    }
+}
+
+impl Element<NaiveDate> {
+    pub(super) fn fired(&mut self, data: &NaiveDate) -> Option<usize> {
+        internals::date_fired(self, data)
+    }
+    pub(super) fn completed(&mut self, data: &NaiveDate, data_pos: &Option<&usize>) -> bool {
+        internals::date_completed(self, data, data_pos)
+    }
+}
+
+impl Element<NaiveTime> {
+    pub(super) fn fired(&mut self, data: &NaiveTime) -> Option<usize> {
+        internals::universal_fired(self, data)
+    }
+    pub(super) fn completed(&mut self, _data: &NaiveTime, data_pos: &Option<&usize>) -> bool {
+        internals::universal_completed(self, data_pos)
+    }
 }
 
 impl<T> Element<T>
@@ -197,43 +221,6 @@ fn parse_complex_value<T>(val: &str, regex: &str, parse_fn: &impl Fn(&str) -> Re
         Ok((border, left_val, None))
     }
 }
-
-impl Fire<u32> for Element<u32> {
-    fn fired(&mut self, data: &u32) -> Option<usize> {
-        internals::universal_fired(self, data)
-    }
-}
-
-impl Fire<NaiveDate> for Element<NaiveDate> {
-    fn fired(&mut self, data: &NaiveDate) -> Option<usize> {
-        internals::date_fired(self, data)
-    }
-}
-
-impl Fire<NaiveTime> for Element<NaiveTime> {
-    fn fired(&mut self, data: &NaiveTime) -> Option<usize> {
-        internals::universal_fired(self, data)
-    }
-}
-
-impl Complete<u32> for Element<u32> {
-    fn completed(&mut self, _data: &u32, data_pos: &Option<&usize>) -> bool {
-        internals::universal_completed(self, data_pos)
-    }
-}
-
-impl Complete<NaiveDate> for Element<NaiveDate> {
-    fn completed(&mut self, data: &NaiveDate, data_pos: &Option<&usize>) -> bool {
-        internals::date_completed(self, data, data_pos)
-    }
-}
-
-impl Complete<NaiveTime> for Element<NaiveTime> {
-    fn completed(&mut self, _data: &NaiveTime, data_pos: &Option<&usize>) -> bool {
-        internals::universal_completed(self, data_pos)
-    }
-}
-
 #[derive(Debug, Default)]
 enum Seq {
     #[default]
@@ -315,12 +302,4 @@ impl FromStr for Border {
             _ => Err("invalid Border value")
         }
     }
-}
-
-pub(super) trait Fire<T> {
-    fn fired(&mut self, data: &T) -> Option<usize>;
-}
-
-pub(super) trait Complete<T> {
-    fn completed(&mut self, data: &T, data_pos: &Option<&usize>) -> bool;
 }

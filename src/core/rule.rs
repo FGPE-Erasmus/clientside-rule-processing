@@ -5,7 +5,7 @@ use chrono::{NaiveDate, NaiveTime};
 use regex::Regex;
 use crate::Config;
 use crate::core::event::Event;
-use crate::core::rule::element::{Complete, Element, Fire};
+use crate::core::rule::element::Element;
 
 mod element;
 
