@@ -5,6 +5,8 @@ pub struct Config {
     #[arg(long)]
     rules: String,
     #[arg(long)]
+    complex_rules: String,
+    #[arg(long)]
     events: String,
 
     #[arg(long)]
@@ -19,6 +21,7 @@ impl Config {
     pub fn dummy() -> Self {
         Self {
             rules: String::from("C:\\Users\\wikto\\Desktop\\eventsystem\\rules.txt"),
+            complex_rules: String::from("C:\\Users\\wikto\\Desktop\\eventsystem\\complex_rules.txt"),
             events: String::from("C:\\Users\\wikto\\Desktop\\eventsystem\\events.txt"),
             object_hits: 3,
             location_hits: 3,
@@ -30,6 +33,9 @@ impl Config {
     }
     pub fn rules(&self) -> &str {
         &self.rules
+    }
+    pub fn complex_rules(&self) -> &str {
+        &self.complex_rules
     }
     pub fn events(&self) -> &str {
         &self.events
