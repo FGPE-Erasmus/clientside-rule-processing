@@ -5,6 +5,7 @@ use std::io::Write;
 use std::path::Path;
 use std::str::FromStr;
 pub use config::Config;
+use crate::core::complex_rule::ComplexRule;
 use crate::core::event::Event;
 use crate::core::rule::Rule;
 use crate::database::{Database, ProcessingResult};
@@ -16,8 +17,9 @@ mod database;
 pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
     let mut rules: Vec<Rule> = parse_data(config.rules())?;
     include_debug_data(&config, &mut rules);
+    let complex_rules: Vec<ComplexRule> = parse_data(config.complex_rules())?;
     let events: Vec<Event> = parse_data(config.events())?;
-    let mut db = Database::new(rules);
+    let mut db = Database::new(rules, complex_rules);
     let results = events
         .into_iter()
         .map(|e| (e.to_string(), db.process(&e)))
