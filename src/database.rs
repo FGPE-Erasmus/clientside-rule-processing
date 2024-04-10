@@ -1,20 +1,24 @@
+use crate::core::complex_rule::ComplexRule;
 use crate::core::event::Event;
 use crate::core::rule::Rule;
 
 pub struct Database {
-    rules: Vec<Rule>
+    rules: Vec<Rule>,
+    complex_rules: Vec<ComplexRule>
 }
 
 impl Database {
-    pub fn new(rules: Vec<Rule>) -> Self {
+    pub fn new(rules: Vec<Rule>, complex_rules: Vec<ComplexRule>) -> Self {
         Self {
-            rules
+            rules,
+            complex_rules
         }
     }
     pub fn process(&mut self, event: &Event) -> ProcessingResult {
         let mut fired_rules = vec!();
         let mut completed_rules = vec!();
         self.process_rules(event, &mut fired_rules, &mut completed_rules);
+        self.process_complex_rules(event, &mut fired_rules, &mut completed_rules);
         ProcessingResult {
             fired_rules,
             completed_rules
@@ -43,6 +47,31 @@ impl Database {
                 }
             }
         }
+    }
+    fn process_complex_rules(&mut self, event: &Event, fired_rules: &mut Vec<String>, completed_rules: &mut Vec<String>) {
+        let mut completed_complex_rules = vec!();
+        for rule in completed_rules.iter_mut() {
+            for complex_rule in self.complex_rules.iter_mut() {
+                if complex_rule.is_completed() {
+                    continue;
+                }
+                let fired = complex_rule.fired(rule, &event.date());
+                if fired.is_none() {
+                    continue;
+                }
+                fired_rules.push(complex_rule.name().to_string());
+                let completed = complex_rule.completed(&fired, &event.date());
+                if completed {
+                    completed_complex_rules.push(complex_rule.name().to_string());
+                    if complex_rule.repeat() {
+                        complex_rule.reset();
+                    } else {
+                        complex_rule.set_completed();
+                    }
+                }
+            }
+        }
+        completed_rules.append(&mut completed_complex_rules);
     }
 }
 
