@@ -1,17 +1,27 @@
+use std::collections::HashMap;
 use crate::core::complex_rule::ComplexRule;
 use crate::core::event::Event;
 use crate::core::rule::Rule;
+use crate::core::results::Result;
 
-pub struct Database {
+pub struct Database<'a> {
     rules: Vec<Rule>,
-    complex_rules: Vec<ComplexRule>
+    complex_rules: Vec<ComplexRule>,
+    results: HashMap<&'a str, Result<'a>>
 }
 
 impl Database {
-    pub fn new(rules: Vec<Rule>, complex_rules: Vec<ComplexRule>) -> Self {
+    pub fn new(rules: Vec<Rule>, complex_rules: Vec<ComplexRule>, results: Vec<Result>) -> Self {
+        let mut res_map = HashMap::new();
+        results
+            .into_iter()
+            .for_each(|r| {
+            res_map.insert(r.name(), r);
+        });
         Self {
             rules,
-            complex_rules
+            complex_rules,
+            results: res_map
         }
     }
     pub fn process(&mut self, event: &Event) -> ProcessingResult {
@@ -72,6 +82,11 @@ impl Database {
             }
         }
         completed_rules.append(&mut completed_complex_rules);
+    }
+    fn process_results(&self, completed_rules: &Vec<String>) {
+        for completed_rule in completed_rules {
+
+        }
     }
 }
 
