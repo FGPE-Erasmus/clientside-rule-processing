@@ -1,4 +1,5 @@
 use std::error::Error;
+use std::fmt::Display;
 use std::fs::File;
 use std::io::{BufRead, BufReader, stdout};
 use std::io::Write;
@@ -15,10 +16,10 @@ mod core;
 mod database;
 
 pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
-    let mut rules: Vec<Rule> = parse_data(config.rules())?;
+    let mut rules: Vec<Rule> = parse_data(&config.rules())?;
     include_debug_data(&config, &mut rules);
-    let complex_rules: Vec<ComplexRule> = parse_data(config.complex_rules())?;
-    let events: Vec<Event> = parse_data(config.events())?;
+    let complex_rules: Vec<ComplexRule> = parse_data(&config.complex_rules())?;
+    let events: Vec<Event> = parse_data(&config.events())?;
     let mut db = Database::new(rules, complex_rules);
     let results = events
         .into_iter()
@@ -45,15 +46,17 @@ fn display_results(results: Vec<(String, ProcessingResult)>) {
         })
 }
 
-fn parse_data<P: AsRef<Path>, T>(path: P) -> Result<Vec<T>, Box<dyn Error>>
-    where T: FromStr, <T as FromStr>::Err: std::fmt::Display {
+fn parse_data<P: AsRef<Path> + Display, T>(path: &P) -> Result<Vec<T>, Box<dyn Error>>
+    where T: FromStr, <T as FromStr>::Err: Display {
     Ok(BufReader::new(File::open(path)?)
         .lines()
         .filter_map(|res| res.ok())
-        .filter_map(|line| {
+        .enumerate()
+        .filter_map(|(mut i, line)| {
+            i += 1;
             let res = line.parse();
             if let Err(err) = &res {
-                eprintln!("could not parse, reason: {err}");
+                eprintln!("could not parse file {path} line {i}, reason: {err}");
             }
             res.ok()
         })

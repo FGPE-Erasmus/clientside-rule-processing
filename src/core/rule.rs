@@ -139,14 +139,14 @@ impl FromStr for Rule {
             rule_name.to_string(),
             repeat,
             false,
-            Element::new_from(elements_data.get("player")),
-            Element::new_from(elements_data.get("did")),
-            Element::new_from(elements_data.get("with")),
-            Element::new_from(elements_data.get("in")),
-            Element::new_from(elements_data.get("of")),
-            Element::new_from(elements_data.get("on")),
-            Element::new_from(elements_data.get("at")),
-            Element::new_from(elements_data.get("achieving")),
+            Element::new_from(elements_data.get("player"), rule_name),
+            Element::new_from(elements_data.get("did"), rule_name),
+            Element::new_from(elements_data.get("with"), rule_name),
+            Element::new_from(elements_data.get("in"), rule_name),
+            Element::new_from(elements_data.get("of"), rule_name),
+            Element::new_from(elements_data.get("on"), rule_name),
+            Element::new_from(elements_data.get("at"), rule_name),
+            Element::new_from(elements_data.get("achieving"), rule_name),
         ))
     }
 }

@@ -67,14 +67,14 @@ impl<T> Element<T>
     where T: Debug,
           Element<T>: Default + FromStr,
           <Element<T> as FromStr>::Err: Debug + Display {
-    pub(super) fn new_from(optional_str: Option<&&str>) -> Self {
+    pub(super) fn new_from(optional_str: Option<&&str>, rule_name: &str) -> Self {
         if optional_str.is_some() {
             let res = optional_str.unwrap().parse();
             if res.is_ok() {
                 res.unwrap()
             } else {
                 let err = res.unwrap_err();
-                eprintln!("could not create element, returning default, reason: {err}");
+                eprintln!("could not create element in rule ({rule_name}), returning default, reason: {err}");
                 Default::default()
             }
         } else {
