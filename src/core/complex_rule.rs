@@ -28,6 +28,7 @@ impl ComplexRule {
     }
     pub fn completed(&mut self, data_pos: &Option<usize>, date_data: &NaiveDate) -> bool {
         if self.data.completed(data_pos, date_data) {
+            self.data.reset();
             self.every -= 1;
         }
         self.every == 0
