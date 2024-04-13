@@ -20,12 +20,13 @@ pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
     include_debug_data(&config, &mut rules);
     let complex_rules: Vec<ComplexRule> = parse_data(&config.complex_rules())?;
     let events: Vec<Event> = parse_data(&config.events())?;
-    let mut db = Database::new(rules, complex_rules);
-    let results = events
+    let results: Vec<core::result::Result> = parse_data(&config.results())?;
+    let mut db = Database::new(rules, complex_rules, results);
+    let res = events
         .into_iter()
         .map(|e| (e.to_string(), db.process(&e)))
         .collect();
-    display_results(results);
+    display_results(res);
     Ok(())
 }
 

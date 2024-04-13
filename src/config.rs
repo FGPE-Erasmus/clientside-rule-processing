@@ -8,6 +8,8 @@ pub struct Config {
     complex_rules: String,
     #[arg(long)]
     events: String,
+    #[arg(long)]
+    results: String,
 
     #[arg(long)]
     object_hits: u32,
@@ -23,6 +25,7 @@ impl Config {
             rules: String::from("C:\\Users\\wikto\\Desktop\\eventsystem\\rules.txt"),
             complex_rules: String::from("C:\\Users\\wikto\\Desktop\\eventsystem\\complex_rules.txt"),
             events: String::from("C:\\Users\\wikto\\Desktop\\eventsystem\\events.txt"),
+            results: String::from("C:\\Users\\wikto\\Desktop\\eventsystem\\results.txt"),
             object_hits: 3,
             location_hits: 3,
             area_hits: 3
@@ -39,6 +42,9 @@ impl Config {
     }
     pub fn events(&self) -> &str {
         &self.events
+    }
+    pub fn results(&self) -> &str {
+        &self.results
     }
     pub fn object_hits(&self) -> u32 {
         self.object_hits

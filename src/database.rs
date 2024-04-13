@@ -1,13 +1,14 @@
 use std::collections::HashMap;
+
 use crate::core::complex_rule::ComplexRule;
 use crate::core::event::Event;
+use crate::core::result::{Kind, Result};
 use crate::core::rule::Rule;
-use crate::core::results::Result;
 
-pub struct Database<'a> {
+pub struct Database {
     rules: Vec<Rule>,
     complex_rules: Vec<ComplexRule>,
-    results: HashMap<&'a str, Result<'a>>
+    results: HashMap<String, Result>
 }
 
 impl Database {
@@ -16,7 +17,7 @@ impl Database {
         results
             .into_iter()
             .for_each(|r| {
-            res_map.insert(r.name(), r);
+            res_map.insert(r.name().to_string(), r);
         });
         Self {
             rules,
@@ -29,6 +30,7 @@ impl Database {
         let mut completed_rules = vec!();
         self.process_rules(event, &mut fired_rules, &mut completed_rules);
         self.process_complex_rules(event, &mut fired_rules, &mut completed_rules);
+        self.process_results(&completed_rules);
         ProcessingResult {
             fired_rules,
             completed_rules
@@ -83,9 +85,49 @@ impl Database {
         }
         completed_rules.append(&mut completed_complex_rules);
     }
-    fn process_results(&self, completed_rules: &Vec<String>) {
+    fn process_results(&mut self, completed_rules: &Vec<String>) {
         for completed_rule in completed_rules {
-
+            let result = self.results.get_mut(completed_rule.as_str());
+            if result.is_none() {
+                continue;
+            }
+            let result = result.unwrap();
+            if result.is_completed() {
+                continue;
+            }
+            let proc_res = result.process();
+            println!("{}", format_args!("rule {} result: {}, completed: {}, data: {:?}",
+                                  completed_rule, proc_res.1, proc_res.2, proc_res.0));
+            if let Kind::Restart = proc_res.1 {
+                for to_restart in proc_res.0 {
+                    let mut restarted = false;
+                    let simple_pos = self.rules
+                        .iter()
+                        .position(|r| r.name().eq(to_restart.as_str()));
+                    if simple_pos.is_some() {
+                        let rule = self.rules.get_mut(simple_pos.unwrap()).unwrap();
+                        rule.reset(0);
+                        restarted = true;
+                    } else {
+                        let complex_pos = self.complex_rules
+                            .iter()
+                            .position(|r| r.name().eq(to_restart.as_str()));
+                        if complex_pos.is_some() {
+                            let rule = self.complex_rules.get_mut(complex_pos.unwrap()).unwrap();
+                            rule.reset();
+                            restarted = true;
+                        }
+                    }
+                    println!("rule {to_restart} found and restarted: {restarted}");
+                }
+            }
+            if proc_res.2 {
+                if result.repeat() {
+                    result.reset();
+                } else {
+                    result.set_completed()
+                }
+            }
         }
     }
 }
