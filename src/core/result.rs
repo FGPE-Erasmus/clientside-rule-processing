@@ -146,7 +146,7 @@ impl Display for Kind {
             Kind::Open => "Open",
             Kind::Restart => "Restart"
         };
-        f.write_fmt(format_args!("Kind: {}", v))
+        f.write_fmt(format_args!("{}", v))
     }
 }
 

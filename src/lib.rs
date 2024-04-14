@@ -38,13 +38,28 @@ fn include_debug_data(config: &Config, rules: &mut Vec<Rule>) {
 
 fn display_results(results: Vec<(String, ProcessingResult)>) {
     let mut out_lock = stdout().lock();
-    results
-        .into_iter()
-        .for_each(|res| {
-            writeln!(out_lock, "{}\n\tfired: {:?}\n\tcompleted: {:?}\n", res.0,
-                     res.1.fired_rules(), res.1.completed_rules())
-                .expect("should be able to print in normal circumstances");
-        })
+    results.into_iter().for_each(|res| {
+         writeln!(out_lock, "{}\n\tfired: {:?}\n\tcompleted: {:?}", res.0,
+                  res.1.fired_rules(), res.1.completed_rules())
+             .expect("should be able to print in normal circumstances");
+        res.1.results()
+            .into_iter()
+            .for_each(|r| {
+                writeln!(out_lock, "\"{}\" result ({}) fired; completed: {}, data: {:?}", r.name(),
+                         r.kind(), r.completed(), r.data())
+                    .expect("should be able to print in normal circumstances");
+                if let Some(data) = r.restart_data() {
+                    data
+                        .into_iter()
+                        .for_each(|d| {
+                            writeln!(out_lock, "rule {} found and restarted: {}", d.0, d.1)
+                                .expect("should be able to print in normal circumstances");
+                        })
+                }
+            });
+        writeln!(out_lock, "")
+            .expect("should be able to print in normal circumstances");
+    });
 }
 
 fn parse_data<P: AsRef<Path> + Display, T>(path: &P) -> Result<Vec<T>, Box<dyn Error>>

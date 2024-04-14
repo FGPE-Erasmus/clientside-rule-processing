@@ -28,12 +28,14 @@ impl Database {
     pub fn process(&mut self, event: &Event) -> ProcessingResult {
         let mut fired_rules = vec!();
         let mut completed_rules = vec!();
+        let mut results = vec!();
         self.process_rules(event, &mut fired_rules, &mut completed_rules);
         self.process_complex_rules(event, &mut fired_rules, &mut completed_rules);
-        self.process_results(&completed_rules);
+        self.process_results(&completed_rules, &mut results);
         ProcessingResult {
             fired_rules,
-            completed_rules
+            completed_rules,
+            results
         }
     }
     fn process_rules(&mut self, event: &Event, fired_rules: &mut Vec<String>, completed_rules: &mut Vec<String>) {
@@ -85,7 +87,7 @@ impl Database {
         }
         completed_rules.append(&mut completed_complex_rules);
     }
-    fn process_results(&mut self, completed_rules: &Vec<String>) {
+    fn process_results(&mut self, completed_rules: &Vec<String>, results: &mut Vec<ResultDetails>) {
         for completed_rule in completed_rules {
             let result = self.results.get_mut(completed_rule.as_str());
             if result.is_none() {
@@ -96,10 +98,16 @@ impl Database {
                 continue;
             }
             let proc_res = result.process();
-            println!("{}", format_args!("rule {} result: {}, completed: {}, data: {:?}",
-                                  completed_rule, proc_res.1, proc_res.2, proc_res.0));
+            let mut res_details = ResultDetails {
+                name: completed_rule.to_owned(),
+                kind: proc_res.1.to_string(),
+                completed: proc_res.2,
+                data: proc_res.0,
+                restart_data: None
+            };
             if let Kind::Restart = proc_res.1 {
-                for to_restart in proc_res.0 {
+                res_details.restart_data = Some(vec!());
+                for to_restart in &res_details.data {
                     let mut restarted = false;
                     let simple_pos = self.rules
                         .iter()
@@ -118,9 +126,10 @@ impl Database {
                             restarted = true;
                         }
                     }
-                    println!("rule {to_restart} found and restarted: {restarted}");
+                    res_details.restart_data.as_mut().unwrap().push((to_restart.to_string(), restarted));
                 }
             }
+            results.push(res_details);
             if proc_res.2 {
                 if result.repeat() {
                     result.reset();
@@ -134,7 +143,34 @@ impl Database {
 
 pub struct ProcessingResult {
     fired_rules: Vec<String>,
-    completed_rules: Vec<String>
+    completed_rules: Vec<String>,
+    results: Vec<ResultDetails>
+}
+
+pub struct ResultDetails {
+    name: String,
+    kind: String,
+    completed: bool,
+    data: Vec<String>,
+    restart_data: Option<Vec<(String, bool)>>
+}
+
+impl ResultDetails {
+    pub fn name(&self) -> &str {
+        &self.name
+    }
+    pub fn kind(&self) -> &str {
+        &self.kind
+    }
+    pub fn completed(&self) -> bool {
+        self.completed
+    }
+    pub fn data(&self) -> &Vec<String> {
+        &self.data
+    }
+    pub fn restart_data(&self) -> &Option<Vec<(String, bool)>> {
+        &self.restart_data
+    }
 }
 
 impl ProcessingResult {
@@ -143,5 +179,8 @@ impl ProcessingResult {
     }
     pub fn completed_rules(&self) -> &Vec<String> {
         &self.completed_rules
+    }
+    pub fn results(&self) -> &Vec<ResultDetails> {
+        &self.results
     }
 }
