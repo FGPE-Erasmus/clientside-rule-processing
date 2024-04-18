@@ -1,6 +1,6 @@
 use std::ops::Range;
 use rand::{Rng, thread_rng};
-use crate::core::result::Selector;
+use crate::core::result::element::Selector;
 
 pub(super) fn process(amount: usize, selector: &Selector, vals: &mut Vec<String>) -> (Vec<String>, bool) {
     match selector {

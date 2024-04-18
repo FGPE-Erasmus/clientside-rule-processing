@@ -2,8 +2,9 @@ use std::collections::HashMap;
 
 use crate::core::complex_rule::ComplexRule;
 use crate::core::event::Event;
-use crate::core::result::{Kind, Result};
+use crate::core::result::Result;
 use crate::core::rule::Rule;
+use crate::core::result::element::Kind;
 
 pub struct Database {
     rules: Vec<Rule>,
@@ -98,44 +99,39 @@ impl Database {
                 continue;
             }
             let proc_res = result.process();
-            let mut res_details = ResultDetails {
-                name: completed_rule.to_owned(),
-                kind: proc_res.1.to_string(),
-                completed: proc_res.2,
-                data: proc_res.0,
-                restart_data: None
-            };
-            if let Kind::Restart = proc_res.1 {
-                res_details.restart_data = Some(vec!());
-                for to_restart in &res_details.data {
-                    let mut restarted = false;
-                    let simple_pos = self.rules
-                        .iter()
-                        .position(|r| r.name().eq(to_restart.as_str()));
-                    if simple_pos.is_some() {
-                        let rule = self.rules.get_mut(simple_pos.unwrap()).unwrap();
-                        rule.reset(0);
-                        restarted = true;
-                    } else {
-                        let complex_pos = self.complex_rules
+            for res in proc_res.into_iter() {
+                let mut res_details = ResultDetails {
+                    name: completed_rule.to_owned(),
+                    kind: res.1.to_string(),
+                    completed: res.2,
+                    data: res.0,
+                    restart_data: None
+                };
+                if let Kind::Restart = res.1 {
+                    res_details.restart_data = Some(vec!());
+                    for to_restart in &res_details.data {
+                        let mut restarted = false;
+                        let simple_pos = self.rules
                             .iter()
                             .position(|r| r.name().eq(to_restart.as_str()));
-                        if complex_pos.is_some() {
-                            let rule = self.complex_rules.get_mut(complex_pos.unwrap()).unwrap();
-                            rule.reset();
+                        if simple_pos.is_some() {
+                            let rule = self.rules.get_mut(simple_pos.unwrap()).unwrap();
+                            rule.reset(0);
                             restarted = true;
+                        } else {
+                            let complex_pos = self.complex_rules
+                                .iter()
+                                .position(|r| r.name().eq(to_restart.as_str()));
+                            if complex_pos.is_some() {
+                                let rule = self.complex_rules.get_mut(complex_pos.unwrap()).unwrap();
+                                rule.reset();
+                                restarted = true;
+                            }
                         }
+                        res_details.restart_data.as_mut().unwrap().push((to_restart.to_string(), restarted));
                     }
-                    res_details.restart_data.as_mut().unwrap().push((to_restart.to_string(), restarted));
                 }
-            }
-            results.push(res_details);
-            if proc_res.2 {
-                if result.repeat() {
-                    result.reset();
-                } else {
-                    result.set_completed()
-                }
+                results.push(res_details);
             }
         }
     }
