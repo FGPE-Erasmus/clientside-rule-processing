@@ -3,12 +3,14 @@ use std::error::Error;
 use std::str::FromStr;
 use chrono::{NaiveDate, NaiveTime};
 use regex::Regex;
+use serde::{Deserialize, Serialize};
 use crate::Config;
 use crate::core::event::Event;
 use crate::core::rule::element::Element;
 
 mod element;
 
+#[derive(Serialize, Deserialize)]
 pub struct Rule {
     // meta
     name: String,
@@ -32,10 +34,10 @@ impl Rule {
                time: Element<NaiveTime>, result: Element<u32>) -> Self {
         Self { name, repeat, completed, player, action, object, location, area, date, time, result }
     }
-    pub fn include_debug_data(&mut self, config: &Config) {
-        self.object.include_debug_data(config.object_hits());
-        self.location.include_debug_data(config.location_hits());
-        self.area.include_debug_data(config.area_hits());
+    pub fn include_debug_data(&mut self, max_hits: u32) {
+        self.object.include_debug_data(max_hits);
+        self.location.include_debug_data(max_hits);
+        self.area.include_debug_data(max_hits);
     }
     pub fn reset(&mut self, new_repeat: i32) {
         self.repeat = new_repeat;

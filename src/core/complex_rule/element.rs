@@ -1,9 +1,11 @@
 use std::error::Error;
 use std::str::FromStr;
 use chrono::NaiveDate;
+use serde::{Deserialize, Serialize};
 
 mod internals;
 
+#[derive(Serialize, Deserialize)]
 pub(super) struct Element {
     seq: Seq,
     streak_data: Option<Vec<NaiveDate>>,
@@ -47,6 +49,7 @@ impl Element {
     }
 }
 
+#[derive(Serialize, Deserialize)]
 pub(super) enum Seq {
     Any, All, Order, Streak(usize)
 }

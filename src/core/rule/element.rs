@@ -5,6 +5,7 @@ use std::str::FromStr;
 use chrono::{NaiveDate, NaiveTime};
 use chrono::Datelike;
 use regex::Regex;
+use serde::{Deserialize, Serialize};
 
 use crate::core::rule::RULE_ELEMENT_REGEX;
 
@@ -16,7 +17,7 @@ const DATE_ELEMENT_REGEX: &str =
 const TIME_ELEMENT_REGEX: &str =
     r"(?<sign>[<>=]*)(?<left>\d{2}:\d{2})(?:..(?<right>\d{2}:\d{2}))?";
 
-#[derive(Debug, Default)]
+#[derive(Debug, Default, Serialize, Deserialize)]
 pub(super) struct Element<T> {
     seq: Seq,
     vals: Vec<(Border, T, Option<T>)>,
@@ -221,7 +222,7 @@ fn parse_complex_value<T>(val: &str, regex: &str, parse_fn: &impl Fn(&str) -> Re
         Ok((border, left_val, None))
     }
 }
-#[derive(Debug, Default)]
+#[derive(Debug, Default, Serialize, Deserialize)]
 enum Seq {
     #[default]
     Any, All, Order, Streak(usize), Selected(Day)
@@ -243,7 +244,7 @@ impl FromStr for Seq {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Serialize, Deserialize)]
 enum Day {
     Everyday, Monday, Tuesday, Wednesday, Thursday, Friday, Saturday, Sunday
 }
@@ -283,7 +284,7 @@ impl Day {
     }
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 enum Border {
     Exact, Less, LessEq, Greater, GreaterEq, Between
 }

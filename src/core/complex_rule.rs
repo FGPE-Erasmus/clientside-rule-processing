@@ -2,10 +2,12 @@ use std::error::Error;
 use std::str::FromStr;
 use chrono::NaiveDate;
 use regex::Regex;
+use serde::{Deserialize, Serialize};
 use crate::core::complex_rule::element::Element;
 
 mod element;
 
+#[derive(Serialize, Deserialize)]
 pub struct ComplexRule {
     // meta
     name: String,

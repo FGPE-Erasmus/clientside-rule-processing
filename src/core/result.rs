@@ -3,11 +3,13 @@ use std::error::Error;
 use std::str::FromStr;
 
 use regex::Regex;
+use serde::{Deserialize, Serialize};
 
 use crate::core::result::element::{Element, Kind};
 
 pub mod element;
 
+#[derive(Serialize, Deserialize)]
 pub struct Result {
     name: String,
     elements: Vec<Element>

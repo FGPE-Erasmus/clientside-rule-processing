@@ -1,9 +1,11 @@
 use std::collections::BTreeSet;
 use std::fmt::{Display, Formatter};
 use std::str::FromStr;
+use serde::{Deserialize, Serialize};
 
 mod internals;
 
+#[derive(Serialize, Deserialize)]
 pub(super) struct Element {
     completed: bool,
     repeat: bool,
@@ -52,6 +54,7 @@ impl Element {
     }
 }
 
+#[derive(Serialize, Deserialize)]
 pub enum Kind {
     Msg, Reward, Offer, Open, Restart
 }
@@ -84,7 +87,7 @@ impl Display for Kind {
     }
 }
 
-#[derive(Default)]
+#[derive(Default, Serialize, Deserialize)]
 pub enum Selector {
     #[default]
     All, Seq, Random, RandomOnce, Choice

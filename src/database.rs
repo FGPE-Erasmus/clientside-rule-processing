@@ -1,4 +1,5 @@
 use std::collections::HashMap;
+use serde::{Deserialize, Serialize};
 
 use crate::core::complex_rule::ComplexRule;
 use crate::core::event::Event;
@@ -6,6 +7,7 @@ use crate::core::result::Result;
 use crate::core::rule::Rule;
 use crate::core::result::element::Kind;
 
+#[derive(Serialize, Deserialize)]
 pub struct Database {
     rules: Vec<Rule>,
     complex_rules: Vec<ComplexRule>,
@@ -13,6 +15,14 @@ pub struct Database {
 }
 
 impl Database {
+    pub fn save(&self) -> String {
+        serde_json::to_string(self)
+            .expect("should be able to serialize db object")
+    }
+    pub fn load(data: String) -> Self {
+        serde_json::from_str(data.as_str())
+            .expect("should be able to deserialize db object")
+    }
     pub fn new(rules: Vec<Rule>, complex_rules: Vec<ComplexRule>, results: Vec<Result>) -> Self {
         let mut res_map = HashMap::new();
         results
