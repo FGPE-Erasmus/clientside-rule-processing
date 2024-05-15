@@ -189,4 +189,7 @@ impl ProcessingResult {
     pub fn results(&self) -> &Vec<ResultDetails> {
         &self.results
     }
+    pub fn into_results(self) -> Vec<ResultDetails> {
+        self.results
+    }
 }
