@@ -1,1 +1,1 @@
-This project is work in progress, some features may not work as expect
+This project is work in progress, some features may not work as expected
