@@ -1,0 +1,54 @@
+//---[UNIVERSAL]
+name = {
+    (ASCII_ALPHANUMERIC | "_")+
+}
+repeat = {
+    "repeat"
+}
+//---[SIMPLE]
+simple_rule_keyword = {
+    LETTER+
+}
+simple_rule_seq = {
+    LETTER+
+}
+simple_rule_content = {
+    (ASCII_DIGIT | ":" | "," | "." | "<" | ">" | "=" | "+" | "*" | LETTER)+
+}
+simple_rule_part = {
+    simple_rule_keyword ~ WHITE_SPACE ~ ((simple_rule_seq ~ "(" ~ simple_rule_content ~ ")") | (simple_rule_content))
+}
+simple_rule = {
+    name ~ ":" ~ WHITE_SPACE ~ simple_rule_part ~ (WHITE_SPACE ~ simple_rule_part)*
+}
+//---[COMPOUND]
+compound_rule_every_content = {
+    ASCII_DIGIT+
+}
+compound_rule_seq = {
+    LETTER+ ~ (WHITE_SPACE ~ ASCII_DIGIT+)?
+}
+compound_rule_content = {
+    (ASCII_ALPHANUMERIC | "_")+
+}
+compound_rule = {
+    name ~ ":" ~ WHITE_SPACE ~ (repeat ~ WHITE_SPACE)?
+        ~ ("every" ~ WHITE_SPACE ~ compound_rule_every_content ~ WHITE_SPACE)?
+        ~ compound_rule_seq ~ WHITE_SPACE ~ compound_rule_content ~ (WHITE_SPACE ~ compound_rule_content)*
+}
+//---[RESULT]
+result_kind = {
+    ("msg" | "reward" | "offer" | "open" | "restart")
+}
+result_seq = {
+    ("all" | "seq" | "random_once" | "random" | "choice")
+}
+result_arg = {
+    (ASCII_ALPHANUMERIC | "_")+
+}
+result_part = {
+    (repeat ~ WHITE_SPACE)? ~ result_kind ~ WHITE_SPACE ~ (result_seq ~ WHITE_SPACE)? ~ result_arg ~ (WHITE_SPACE ~ result_arg)*
+}
+rule_result = {
+    name ~ WHITE_SPACE ~ "->" ~ WHITE_SPACE ~ result_part ~ (";" ~ WHITE_SPACE ~ result_part)*
+}
