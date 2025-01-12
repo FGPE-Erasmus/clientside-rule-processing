@@ -8,9 +8,10 @@ The application is not ready to be shipped yet due to a few minor issues, todo l
 
 1. connect to real server URLs in 'browser' module
 2. compatibility issues with last 5 (unimplemented yet) student API endpoints
-3. expose stable public API
-4. Document installation & usage section
-5. Document API section
+3. Implement KeyCloak auth.
+4. expose stable public API
+5. Document installation & usage section
+6. Document API section
 
 ## Features
 
