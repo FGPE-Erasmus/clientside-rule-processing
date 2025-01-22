@@ -3,10 +3,12 @@ use processor::core::State;
 use tracing_subscriber::layer::SubscriberExt;
 use tracing_subscriber::util::SubscriberInitExt;
 use tracing_web::MakeWebConsoleWriter;
+use wasm_bindgen::prelude::wasm_bindgen;
 
 mod net;
 mod parsing;
 
+#[wasm_bindgen]
 pub fn run(event: Event, server_url: &str, player_registration_id: i32) {
     init_tracing();
 
