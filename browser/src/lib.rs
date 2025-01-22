@@ -7,30 +7,32 @@ use tracing_web::MakeWebConsoleWriter;
 mod net;
 mod parsing;
 
-pub fn run(event: Event) {
+pub fn run(event: Event, server_url: &str, player_registration_id: i32) {
     init_tracing();
 
-    let potential_game_state = get_game_state();
+    let potential_game_state = get_game_state(server_url);
     if let Err(err) = potential_game_state {
         tracing::error!("could not get game state, aborting - details {err}");
         return;
     }
     let mut game_state = potential_game_state.unwrap();
     let _ = game_state.update(&event);
-    let saving_result = net::upload_game_state(game_state.save().as_str());
+    let saving_result = net::upload_game_state(
+        game_state.save().as_str(), &game_state.save(), player_registration_id
+    );
     if let Err(err) = saving_result {
         tracing::error!("could not save game state, aborting - details {err}");
     }
 }
 
-fn get_game_state() -> anyhow::Result<State> {
-    let state = if let Some(state_str) = net::download_game_state()? {
+fn get_game_state(server_url: &str) -> anyhow::Result<State> {
+    let state = if let Some(state_str) = net::download_game_state(server_url)? {
         State::load(state_str.as_str())
     } else {
         State::new(
-            parsing::parse_simple_rules(net::download_simple_rules()?.as_str())?,
-            parsing::parse_compound_rules(net::download_compound_rules()?.as_str())?,
-            parsing::parse_rule_results(net::download_rule_results()?.as_str())?,
+            parsing::parse_simple_rules(net::download_simple_rules(server_url)?.as_str())?,
+            parsing::parse_compound_rules(net::download_compound_rules(server_url)?.as_str())?,
+            parsing::parse_rule_results(net::download_rule_results(server_url)?.as_str())?,
         )
     };
     Ok(state)

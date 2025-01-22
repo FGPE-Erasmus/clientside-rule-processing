@@ -1,14 +1,12 @@
 use std::error::Error;
 use std::fmt::{Debug, Display, Formatter};
 
-use reqwest::StatusCode;
-
 pub struct ResponseError {
-    status: StatusCode
+    status: u16
 }
 
 impl ResponseError {
-    pub fn new(status: StatusCode) -> Self {
+    pub fn new(status: u16) -> Self {
         Self { status }
     }
 }
