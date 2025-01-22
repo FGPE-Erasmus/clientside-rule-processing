@@ -1,11 +1,8 @@
 use std::collections::HashMap;
-use std::error::Error;
-use std::fmt::{Debug, Display};
 use std::str::{FromStr, Split};
 
 use common::simple_rule::{NamedSimpleRule, SimpleRule, SimpleRuleBorder, SimpleRulePart, SimpleRulePartValue, SimpleRuleSeq, WrappedSimpleRulePart};
 use pest::iterators::Pair;
-use pest::Parser;
 
 use crate::parsing::Rule;
 use crate::parsing::simple_rule::error::SimpleRuleParseError;
@@ -109,8 +106,8 @@ where T: Clone + FromStr {
 
 fn parse_value<T>(input: &str) -> Result<SimpleRulePartValue<T>, SimpleRuleParseError>
 where T: Clone + FromStr {
-    let mut border;
-    let mut left_val;
+    let border;
+    let left_val;
     let mut right_val = None;
     if input.contains("..") {
         let mut content = input.split("..");
@@ -120,7 +117,7 @@ where T: Clone + FromStr {
             .ok_or_else(|| SimpleRuleParseError::IncorrectContent)?
             .replace(".", "-")
             .parse::<T>()
-            .map_err(|e| SimpleRuleParseError::IncorrectContent)?);
+            .map_err(|_| SimpleRuleParseError::IncorrectContent)?);
     } else if input.contains(">=") {
         border = SimpleRuleBorder::GreaterEq;
         left_val = input.split(">=")
