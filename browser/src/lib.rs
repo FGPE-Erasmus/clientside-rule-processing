@@ -1,51 +1,63 @@
+use serde::{Deserialize, Serialize};
 use processor::core::State;
 use tracing_subscriber::layer::SubscriberExt;
 use tracing_subscriber::util::SubscriberInitExt;
 use tracing_web::MakeWebConsoleWriter;
 use wasm_bindgen::JsValue;
 use wasm_bindgen::prelude::wasm_bindgen;
-
-mod net;
+use common::event::Event;
+use common::rule_result::RuleResultKind;
 mod parsing;
 
 #[wasm_bindgen]
-pub async fn run(js_event: JsValue, server_url: &str, player_registration_id: i32) {
-    let event = match serde_wasm_bindgen::from_value(js_event) {
-        Ok(e) => e,
+pub async fn process_event(js_input: JsValue) -> Option<JsValue> {
+    init_tracing();
+
+    let input: ProcessEventInput = match serde_wasm_bindgen::from_value(js_input) {
+        Ok(i) => i,
         Err(err) => {
-            tracing::error!("could not deserialize event, aborting - details {err}");
-            return;
+            tracing::error!("could not deserialize input, aborting - details {err}");
+            return None;
         }
     };
 
-    init_tracing();
+    let mut state = if input.game_state.is_empty() {
+        State::new(
+            parsing::parse_simple_rules(input.simple_rules_str.as_str())
+                .expect("invalid simple rules string, can't parse"),
+            parsing::parse_compound_rules(input.compound_rules_str.as_str())
+                .expect("invalid compound rules string, can't parse"),
+            parsing::parse_rule_results(input.rule_results_str.as_str())
+                .expect("invalid rule results string, can't parse"),
+        )
+    } else {
+        State::load(input.game_state.as_str())
+    };
 
-    let potential_game_state = get_game_state(server_url).await;
-    if let Err(err) = potential_game_state {
-        tracing::error!("could not get game state, aborting - details {err}");
-        return;
-    }
-    let mut game_state = potential_game_state.unwrap();
-    let _ = game_state.update(&event);
-    let saving_result = net::upload_game_state(
-        game_state.save().as_str(), &game_state.save(), player_registration_id
-    ).await;
-    if let Err(err) = saving_result {
-        tracing::error!("could not save game state, aborting - details {err}");
-    }
+    let results = state.update(&input.event);
+
+    let output = ProcessEventOutput {
+        game_state: state.save(),
+        results
+    };
+
+    Some(serde_wasm_bindgen::to_value(&output)
+        .expect("should be able to convert output to JS value (api contract)"))
 }
 
-async fn get_game_state(server_url: &str) -> anyhow::Result<State> {
-    let state = if let Some(state_str) = net::download_game_state(server_url).await? {
-        State::load(state_str.as_str())
-    } else {
-        State::new(
-            parsing::parse_simple_rules(net::download_simple_rules(server_url).await?.as_str())?,
-            parsing::parse_compound_rules(net::download_compound_rules(server_url).await?.as_str())?,
-            parsing::parse_rule_results(net::download_rule_results(server_url).await?.as_str())?,
-        )
-    };
-    Ok(state)
+#[derive(Serialize, Deserialize)]
+struct ProcessEventInput {
+    event: Event,
+    game_state: String,
+    simple_rules_str: String,
+    compound_rules_str: String,
+    rule_results_str: String
+}
+
+#[derive(Serialize, Deserialize)]
+struct ProcessEventOutput {
+    game_state: String,
+    results: Vec<(RuleResultKind, Vec<String>)>
 }
 
 fn init_tracing() {
