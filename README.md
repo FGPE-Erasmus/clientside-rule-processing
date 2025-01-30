@@ -27,10 +27,10 @@ Prerequisites:
 
 Building:
 
-    1. open project directory in terminal
+    1. Open project directory in terminal
     2. Navigate to /browser module
-    3. execute build command `wasm-pack build --target web`
-    4. enjoy results from `/pkg` directory
+    3. Execute build command `wasm-pack build --target web`
+    4. Enjoy results from `/pkg` directory
 
 Usage:
 
