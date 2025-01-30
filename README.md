@@ -39,6 +39,8 @@ It exports one function `process_event` as documented in the API section.
 It processes an event created by user, updates and returns their context (game state) along with a result (reward). 
 The function is asynchronous, so expect a `Promise`.
 
+Sample usage from HTML file can be seen in `/browser/index.html`
+
 ## API
 
 Origin:
