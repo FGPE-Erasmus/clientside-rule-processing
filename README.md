@@ -7,11 +7,11 @@ Clientside application used for event processing.
 The application is not ready to be shipped yet due to a few minor issues, todo list:
 
 - ~~create seamless integration with JS via WASM (client-side)~~
-- compatibility issues with last 5 (unimplemented yet) student API endpoints (server-side)
+- ~~compatibility issues with last 5 (unimplemented yet) student API endpoints (server-side)~~
 - implement KeyCloak auth for student API endpoints (server-side)
 - ~~expose stable public API (client-side)~~
 - ~~document installation & usage section (client-side & server-side)~~
-- document API section (~~client-side~~ & server-side)
+- ~~document API section (client-side & server-side)~~
 
 ## Features
 
