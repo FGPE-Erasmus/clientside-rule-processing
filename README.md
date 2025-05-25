@@ -2,17 +2,6 @@
 
 Clientside application used for event processing.
 
-## Important!
-
-The application is not ready to be shipped yet due to a few minor issues, todo list:
-
-- ~~create seamless integration with JS via WASM (client-side)~~
-- ~~compatibility issues with last 5 (unimplemented yet) student API endpoints (server-side)~~
-- implement KeyCloak auth for student API endpoints (server-side)
-- ~~expose stable public API (client-side)~~
-- ~~document installation & usage section (client-side & server-side)~~
-- ~~document API section (client-side & server-side)~~
-
 ## Features
 
 - rock solid and fast (thanks to Rust)
@@ -31,6 +20,11 @@ Building:
     2. Navigate to /browser module
     3. Execute build command `wasm-pack build --target web`
     4. Enjoy results from `/pkg` directory
+
+Testing:
+    
+    1. Open project directory in terminal
+    2. Execute command `cargo test`
 
 Usage:
 
