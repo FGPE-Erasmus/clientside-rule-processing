@@ -7,25 +7,51 @@
 </head>
 
 <body>
-<script type="module"> import init, { process_event } from "./pkg/browser.js";
-init().then(() => {
-  const input_payload = {
-    event: {
-      parts: {
-        "player": {"NumberBased":1},
-        "on": {"DateBased": "2024-10-27"},
-        "at": {"TimeBased": "10:30:00"},
-        "result": {"NumberBased":100},
-      }
-    },
-    game_state: "",
-    simple_rules_str: "simple_rule: player 1 on 2020.01.01..2026.01.01 at 8:30..23:30 achieving 100 repeat +",
-    compound_rules_str: "",
-    rule_results_str: "simple_rule -> msg nicely_done_simple_rule"
-  }
-  const res = process_event(input_payload);
-  console.log("Result:", res);
-});
+<script type="module">
+  import init, { process_event } from "./pkg/browser.js";
+
+  init().then(async () => {
+    const input_payload = {
+      event: {
+        parts: {
+          "player": {"NumberBased":1},
+          "on": {"DateBased": "2024-10-27"},
+          "at": {"TimeBased": "10:30:00"},
+          "achieving": {"NumberBased":100},
+        }
+      },
+      game_state: "",
+      simple_rules_str: "simple_rule: player 1 on 2020.01.01..2026.01.01 at 8:30..23:30 achieving 100 repeat +",
+      compound_rules_str: "",
+      rule_results_str: "simple_rule -> msg nicely_done_simple_rule"
+    };
+
+    const res = await process_event(input_payload);
+    console.log("Result:", res);
+
+    if (!res) {
+      console.error("First event processing failed, cannot continue.");
+      return;
+    }
+
+    let input_payload2 = {
+      event: {
+        parts: {
+          "player": {"NumberBased":1},
+          "on": {"DateBased": "2024-10-27"},
+          "at": {"TimeBased": "10:30:00"},
+          "achieving": {"NumberBased":100},
+        }
+      },
+      game_state: res.game_state,
+      simple_rules_str: "", // Not needed if game_state is provided
+      compound_rules_str: "", // Not needed if game_state is provided
+      rule_results_str: "" // Not needed if game_state is provided
+    };
+
+    let res2 = await process_event(input_payload2);
+    console.log("Result2:", res2);
+  });
 </script>
 </body>
 

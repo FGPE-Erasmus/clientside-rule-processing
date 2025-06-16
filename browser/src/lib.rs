@@ -1,3 +1,4 @@
+use std::sync::Once;
 use serde::{Deserialize, Serialize};
 use processor::core::State;
 use tracing_subscriber::layer::SubscriberExt;
@@ -9,9 +10,13 @@ use common::event::Event;
 use common::rule_result::RuleResultKind;
 mod parsing;
 
+static INIT: Once = Once::new();
+
 #[wasm_bindgen]
 pub async fn process_event(js_input: JsValue) -> Option<JsValue> {
-    init_tracing();
+    INIT.call_once(|| {
+        init_tracing();
+    });
 
     let input: ProcessEventInput = match serde_wasm_bindgen::from_value(js_input) {
         Ok(i) => i,
